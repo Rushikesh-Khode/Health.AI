@@ -13,3 +13,5 @@ class User(models.Model):
     gender = models.ForeignKey(Gender, on_delete=models.DO_NOTHING)
     birthday = models.DateField()
     phone_no = models.CharField(max_length=20)
+    x_auth_token = models.CharField(null=True, max_length=256)
+    x_auth_created_at = models.DateTimeField(null=True)
