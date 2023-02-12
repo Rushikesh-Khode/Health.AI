@@ -1,13 +1,10 @@
-import random
-
-from rest_framework.decorators import api_view
-from users.seralizers import UserSerializer
 from argon2 import PasswordHasher
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import User
-from datetime import datetime
-
+from auth_service import Auth
+from users.seralizers import UserSerializer
 from users.utility.passwordUtility import validate_password
+from .models import User
 
 password_generator = PasswordHasher()
 
@@ -28,7 +25,6 @@ def register_user(request, format=None):
                 serializer.validated_data["password"] = password_generator.hash(serializer.validated_data["password"])
                 serializer.save()
 
-                # TODO: redirect to login page
                 return Response({"email": serializer.validated_data["email"]})
             else:
 
@@ -45,16 +41,23 @@ def register_user(request, format=None):
 
 @api_view(["POST"])
 def login_user(request, format=None):
-    user = User.objects.get(email=request.data["email"])
+    try:
+        user = User.objects.get(email=request.data["email"])
+    except:
+        return Response({"error": {"user": "user not found"}})
 
-    if user and password_generator.verify(user.password, request.data["password"]):
-        x_auth_token = password_generator.hash(
-            user.email + str(user.birthday) + str(user.gender) + str(random.randint(100000, 1000000000)))
-        user.x_auth_token = x_auth_token
-        user.x_auth_created_at = datetime.now()
+    if user and request.data["password"] and password_generator.verify(user.password, request.data["password"]):
+        x_auth_token = Auth.generate_token(user)
 
-        user.save()
-        # TODO : redirect to dashboard
         return Response({"email": request.data["email"], "x-auth-token": x_auth_token})
 
     return Response({"error": {"user": "email or password invalid"}})
+
+
+@api_view(["GET"])
+def logout_user(request, format=None):
+    user = User.objects.get(email=request.data["email"])
+
+    Auth.invalidate_token(user)
+
+    return Response({"email": request.data["email"]})
