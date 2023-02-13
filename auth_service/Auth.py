@@ -1,7 +1,7 @@
 import random
 from users.models import User
 from argon2 import PasswordHasher
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def generate_token(user: User) -> str:
@@ -9,7 +9,7 @@ def generate_token(user: User) -> str:
     base_token = user.email + str(user.birthday) + str(user.phone_no) + salt
     token = PasswordHasher().hash(base_token)
     user.x_auth_token = token
-    user.x_auth_created_at = datetime.now()
+    user.x_auth_created_at = datetime.now(timezone.utc)
 
     user.save()
 
@@ -23,7 +23,7 @@ def validate_token(user: User, token: str) -> bool:
     if user.x_auth_token != token:
         return False
 
-    current_time = datetime.now()
+    current_time = datetime.now(timezone.utc)
     token_age = current_time - user.x_auth_created_at
     minutes = token_age.seconds // 60
     hour = minutes // 60

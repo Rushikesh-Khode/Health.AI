@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="user",
+            model_name="users",
             name="id",
             field=models.IntegerField(
                 auto_created=True, primary_key=True, serialize=False

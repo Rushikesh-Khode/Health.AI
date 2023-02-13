@@ -11,12 +11,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="user",
+            model_name="users",
             name="x_auth_created_at",
             field=models.DateTimeField(null=True),
         ),
         migrations.AddField(
-            model_name="user",
+            model_name="users",
             name="x_auth_token",
             field=models.CharField(max_length=256, null=True),
         ),
