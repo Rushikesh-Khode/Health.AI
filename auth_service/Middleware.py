@@ -1,4 +1,3 @@
-import json
 from users.models import User
 from .Auth import validate_token
 
@@ -14,10 +13,10 @@ class X_Auth_Middleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        data = json.loads(request.body.decode("utf-8"))
         if not self.is_excluded_path(request.path):
-            x_auth_token = data["x-auth-token"]
-            email = data["email"]
+            headers = request.META["HTTP_AUTHORIZATION"].split(" ")
+            x_auth_token = headers[1]
+            email = headers[0]
             user = User.objects.get(email=email)
 
             if not validate_token(user, x_auth_token):
