@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "users",
+    "brain_tumor_classification",
 ]
 
 MIDDLEWARE = [

@@ -6,7 +6,8 @@ class X_Auth_Middleware:
     excluded_paths = [
         "users/login.json",
         "users/register.json",
-        # "users/logout.json",
+        "users/logout.json",
+        "admin/"
     ]
 
     def __init__(self, get_response):
@@ -21,6 +22,7 @@ class X_Auth_Middleware:
 
             if not validate_token(user, x_auth_token):
                 raise Exception("Unauthorized Access")
+            request.userEmail = user.email
 
         return self.get_response(request)
 
