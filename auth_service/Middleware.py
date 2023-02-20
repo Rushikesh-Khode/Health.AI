@@ -1,3 +1,5 @@
+from rest_framework.response import Response
+
 from users.models import User
 from .Auth import validate_token
 
@@ -21,7 +23,8 @@ class X_Auth_Middleware:
             user = User.objects.get(email=email)
 
             if not validate_token(user, x_auth_token):
-                raise Exception("Unauthorized Access")
+                return Response({"error": "Invalid api call"}, status=400)
+
             request.userEmail = user.email
 
         return self.get_response(request)

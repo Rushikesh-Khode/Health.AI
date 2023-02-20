@@ -5,6 +5,8 @@ from .ml_model import predict
 from .seralizer import PredicationSerializer
 from .models import Predictions
 
+one_mb_str_len = 1048576
+
 
 @api_view(["POST"])
 def get_brain_tumor_classification_prediction(request, format=None):
@@ -13,8 +15,13 @@ def get_brain_tumor_classification_prediction(request, format=None):
     user = User.objects.get(email=email)
 
     if not image:
-        raise Exception("No image found")
+        return Response({"error": "Image Size More Than 1mb"}, 404)
+
+    if len(image) > one_mb_str_len:
+        return Response({"error": "Image Size More Than 1mb"}, 404)
+
     prediction = predict(image)
+
     data = {
         "user": user.pk,
         "image": image,
@@ -39,7 +46,10 @@ def get_predictions_history(request, images=0, format=None):
     user = User.objects.get(email=email)
     prediction_history = Predictions.objects.filter(user=user.pk).order_by("createdAt")
     history_data = []
-    if images not in (1, 0): return Response({"error": "bad url format at /images/"}, 400)
+
+    if images not in (1, 0):
+        return Response({"error": "bad url format at /images/"}, 400)
+
     for prediction in prediction_history:
         if images:
             history_data.append(

@@ -56,8 +56,9 @@ def login_user(request, format=None):
 
 @api_view(["GET"])
 def logout_user(request, format=None):
-    user = User.objects.get(email=request.data["email"])
+    email = request.META["HTTP_AUTHORIZATION"].split(" ")[0]
+    user = User.objects.get(email=email)
 
     Auth.invalidate_token(user)
 
-    return Response({"email": request.data["email"]})
+    return Response({"email": email})
