@@ -1,1 +1,1 @@
-web: gunicorn 'HealthAI.wsgi'
+web: python manage.py migrate && gunicorn 'HealthAI.wsgi'
