@@ -1,7 +1,6 @@
 import base64
 import io
 import os
-from tkinter import Image
 import cv2
 import imutils
 import numpy as np
