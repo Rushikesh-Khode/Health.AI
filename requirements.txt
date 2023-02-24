@@ -26,7 +26,7 @@ tensorflow==2.11.0
 tensorflow-estimator==2.11.0
 tensorflow-io-gcs-filesystem==0.30.0
 text-unidecode==1.3
-tk=8.6.12
+tk==8.6.12
 tqdm==4.64.1
 wincertstore==0.2
 opencv-python-headless==4.6.0.66
