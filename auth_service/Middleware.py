@@ -16,7 +16,7 @@ class X_Auth_Middleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if not self.is_excluded_path(request.path):
+        if not self.is_excluded_path(request.path) and "HTTP_AUTHORIZATION" in request.META:
             headers = request.META["HTTP_AUTHORIZATION"].split(" ")
             x_auth_token = headers[1]
             email = headers[0]
