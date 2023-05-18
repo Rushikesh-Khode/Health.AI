@@ -12,7 +12,8 @@ brain_tumor_classification_model = tf.keras.models.load_model(
 
 
 def crop_img(img):
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    channels = img.shape[2] if len(img.shape) > 2 else 0
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) if channels > 0 else img
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
     thresh = cv2.threshold(gray, 45, 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.erode(thresh, None, iterations=2)
@@ -37,6 +38,7 @@ def preprocess_image(image):
     if len(image) == 3 and image.shape[2] == 4:
         image = image[:, :, :3]
     image = crop_img(image)
+    image = image if len(image.shape) > 2 else cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
     image = tf.image.resize(image, [256, 256])
     image = tf.expand_dims(image, axis=0)
     return image
@@ -45,5 +47,6 @@ def preprocess_image(image):
 def predict(image):
     image = preprocess_image(image)
     predication = brain_tumor_classification_model.predict(image, verbose=0)[0]
+
     return {'glioma': predication[0], 'meningioma': predication[1], 'notumor': predication[2],
             'pituitary': predication[3]}

@@ -46,12 +46,14 @@ def login_user(request, format=None):
     except:
         return Response({"error": {"users": "users not found"}})
 
-    if user and request.data["password"] and password_generator.verify(user.password, request.data["password"]):
-        x_auth_token = Auth.generate_token(user)
+    try:
+        if user and request.data["password"] and password_generator.verify(user.password, request.data["password"]):
+            x_auth_token = Auth.generate_token(user)
 
-        return Response({"email": request.data["email"], "x-auth-token": x_auth_token})
+            return Response({"email": request.data["email"], "x-auth-token": x_auth_token})
+    except Exception:
 
-    return Response({"error": {"users": "email or password invalid"}})
+        return Response({"error": {"users": "email or password invalid"}})
 
 
 @api_view(["GET"])
