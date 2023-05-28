@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from users.models import User
-from .ml_model import predict
+from .ml_model import predict, is_mri_image
 from .seralizer import PredicationSerializer
 from .models import Predictions
 
@@ -11,6 +11,7 @@ one_mb_str_len = 1048576
 @api_view(["POST"])
 def get_brain_tumor_classification_prediction(request, format=None):
     image = request.data["image"].replace("data:image/jpeg;base64,", "")
+    force_push = bool(request.data["forcePush"])
     email = request.META["HTTP_AUTHORIZATION"].split(" ")[0]
     user = User.objects.get(email=email)
 
@@ -20,8 +21,13 @@ def get_brain_tumor_classification_prediction(request, format=None):
     if len(image) > one_mb_str_len:
         return Response({"error": "Image Size More Than 1mb"}, 404)
 
-    prediction = predict(image)
+    is_valid_image = is_mri_image(image)
 
+    if not force_push and not is_valid_image:
+        return Response({"email": email, "prediction": "Not Valid Mri Image"},
+                        status=406)
+
+    prediction = predict(image)
     data = {
         "user": user.pk,
         "image": image,

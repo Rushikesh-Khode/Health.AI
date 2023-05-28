@@ -9,6 +9,8 @@ from PIL import Image
 
 brain_tumor_classification_model = tf.keras.models.load_model(
     os.path.join("saved_ml_models", "brain_tumor_classification"))
+mri_image_detector = tf.keras.models.load_model(
+    os.path.join("saved_ml_models", "mri_image_detector"))
 
 
 def crop_img(img):
@@ -32,12 +34,13 @@ def crop_img(img):
     return new_img
 
 
-def preprocess_image(image):
+def preprocess_image(image, crop=False):
     image = Image.open(io.BytesIO(base64.decodebytes(bytes(image, "utf-8"))))
     image = np.array(image)
     if len(image) == 3 and image.shape[2] == 4:
         image = image[:, :, :3]
-    image = crop_img(image)
+    if crop:
+        image = crop_img(image)
     image = image if len(image.shape) > 2 else cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
     image = tf.image.resize(image, [256, 256])
     image = tf.expand_dims(image, axis=0)
@@ -45,8 +48,14 @@ def preprocess_image(image):
 
 
 def predict(image):
-    image = preprocess_image(image)
+    image = preprocess_image(image, crop=True)
     predication = brain_tumor_classification_model.predict(image, verbose=0)[0]
 
     return {'glioma': predication[0], 'meningioma': predication[1], 'notumor': predication[2],
             'pituitary': predication[3]}
+
+
+def is_mri_image(image):
+    image = preprocess_image(image)
+    predication = mri_image_detector.predict(image, verbose=0)[0]
+    return bool(round(predication[0]))
